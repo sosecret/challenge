@@ -1,0 +1,114 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<!--
+		Since it's simple I'm putting all js, css, html in the same place. The WelcomeHandler could be
+		replaced by a more generic file server that attends normal requests for resource files etc.	 
+	-->
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<head>
+		<script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js" type="text/javascript"></script>
+		<script>
+		
+			var timerId = null;
+			
+			/** 
+			 * Since we need to support older browsers I'm not relying on
+			 * HTML5 and going for an old fashioned iframe based solution.
+			 */
+			function upload(form) {
+				form.submit();
+				$("#file").attr("disabled", "disabled");
+				timerId = setInterval(poll, 1000);
+			}
+			
+			function poll() {
+				$.ajax({
+					url: '/progress',
+					success: function(data) {
+						if (isNaN(data)) {
+							$("#pB").css("background", "#6A6");
+							$("#pB").css("width", "100%");							
+							clearInterval(timerId); 
+							showLink();
+						} else { 
+							data = Math.floor(data);
+							data = (data > 100) ? 100 : data;
+							$("#pB").css("display", "block");							
+							$("#pB").css("width", data + "%");							
+						} 
+					},
+					error: function() {
+						clearInterval(timerId);
+					}
+				});
+			}
+			
+			function getFileName() {
+				var fileName = $("#file").val();
+				if (fileName) {
+					fileName = fileName.split(/(\\|\/)/g).pop();
+				}
+				return fileName;
+			}
+			
+			function showLink() {
+				var fileName = getFileName();
+				$("#f").parent().append('<a href="/download/' + fileName + '">download</a>');				
+			}
+			
+			function postComment() {
+				var query = $.post("/comment", $("#commentForm").serialize())
+					.success(function() { $("submitComment").attr("disabled", ""); })
+					.error(function() { $("submitComment").attr("disabled", ""); })
+					.complete(function() { $("submitComment").attr("disabled", ""); });
+			}
+			
+		</script>
+		<style>
+			.box {
+				margin: 10px 0 10px 20px;
+			}
+			
+			#pbContainer {
+				margin: 20px 0;
+				background:#fff;
+				width: 200px;
+				height: 10px;							
+				border:1px solid #ddd;
+			}
+			
+			#pB {
+				width:0%;
+				height:100%;
+				background:#66A;							
+			}
+			
+			textarea {
+				width:400px;
+				height:100px;
+			}
+			
+		</style>
+	</head>
+	<body>
+		<h1>SuperUploader</h1>
+		<h2>Upload a file</h2>
+		<div class="box">
+			<form id="f" method="POST" action="/upload" target="upload_iframe" encoding="multipart/form-data" enctype="multipart/form-data">
+				<input type="file" name="file" id="file" onChange="upload(this.form)"></input>
+				<div id="pBcontainer">
+					<div id="pB">
+					</div>
+				</div>
+			</form>
+		</div>
+		<h2>Comment on this file</h2>
+		<div class="box">
+			<form id="commentForm" method="POST" action="/comment" onSubmit="postComment(); return false;">
+				<textarea name="c" id="c"></textarea>
+				<br />
+				<input type="submit" id="submitComment" value="save"></input>
+			</form>
+		</div>
+		<iframe id="upload_iframe" name="upload_iframe" style="border:0; width: 0; height:0;" src="javascript:false"></iframe>
+	</body>
+</html>

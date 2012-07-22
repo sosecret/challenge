@@ -1,0 +1,51 @@
+<project name="superuploader" default="dist" basedir=".">
+	<property name="src.dir" location="src" />
+	<property name="lib.dir" location="lib" />
+	<property name="build.dir" location="build" />
+	<property name="dist.dir" location="dist" />
+	<property name="project.name" value="superuploader" />
+	<property name="storage.dir" value="storage" />
+	<property name="public.dir" value="public" />
+
+	<path id="classpath">
+		<fileset dir="${lib.dir}" includes="**/*.jar" />
+		<fileset dir="${dist.dir}" includes="**/*.jar" />
+	</path>
+
+	<target name="init">
+		<tstamp />
+		<mkdir dir="${build.dir}" />
+		<mkdir dir="${dist.dir}" />
+	</target>
+
+	<target name="compile" depends="init">
+		<!-- Compile the java code from ${src} into ${build} -->
+		<javac srcdir="${src.dir}" destdir="${build.dir}" classpathref="classpath" debug="on" />
+	</target>
+
+	<target name="jar" depends="compile">
+		<mkdir dir="${dist.dir}" />
+		<jar jarfile="${dist.dir}/${project.name}.jar" basedir="${build.dir}" />
+	</target>
+
+	<target name="dist" depends="jar">
+	</target>
+
+	<target name="clean" description="clean up">
+		<!-- Delete the ${build} and ${dist} directory trees -->
+		<delete dir="${build.dir}" />
+		<delete dir="${dist.dir}" />
+	</target>
+
+	<target name="run">
+		<java fork="false" classname="org.varoa.soundcloud.BasicHttpServer">
+			<classpath>
+				<path refid="classpath" />
+				<path location="${dist.dir}/${project.name}.jar" />
+			</classpath>
+			<arg value="${public.dir}" />
+			<arg value="${storage.dir}" />
+		</java>
+	</target>
+
+</project>
