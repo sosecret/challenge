@@ -26,7 +26,7 @@ public class ProgressHandler implements HttpAsyncRequestHandler<HttpRequest> {
 	final public void handle(final HttpRequest request, final HttpAsyncExchange httpexchange, final HttpContext context) throws HttpException, IOException {
 		String sessionId = SessionExtractor.extractSession(context);
 		Float progress = UploadRequestTracker.getInstance().getUploadProgressPercent(sessionId);
-		log.info("Poll received for session: \"" + sessionId + "\", sending " + progress);
+		log.debug("Poll received for session: \"" + sessionId + "\", sending " + progress);
 		HttpResponse response = httpexchange.getResponse();
 		NStringEntity stringEntity = new NStringEntity((progress == null)?"NULL" : progress.toString());
 		response.setEntity(stringEntity);

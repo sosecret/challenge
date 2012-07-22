@@ -6,6 +6,7 @@
 	<property name="project.name" value="superuploader" />
 	<property name="storage.dir" value="storage" />
 	<property name="public.dir" value="public" />
+	<property name="port" value="port" />
 
 	<path id="classpath">
 		<fileset dir="${lib.dir}" includes="**/*.jar" />
@@ -38,6 +39,7 @@
 	</target>
 
 	<target name="run">
+		<mkdir dir="${storage.dir}" />
 		<java fork="false" classname="org.varoa.soundcloud.BasicHttpServer">
 			<classpath>
 				<path refid="classpath" />
@@ -45,6 +47,7 @@
 			</classpath>
 			<arg value="${public.dir}" />
 			<arg value="${storage.dir}" />
+			<arg value="${port}" />
 		</java>
 	</target>
 
